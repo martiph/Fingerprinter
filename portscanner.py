@@ -2,6 +2,8 @@ import socket
 import sys
 from datetime import datetime
 
+# copied some things from here: https://www.pythonforbeginners.com/code-snippets-source-code/port-scanner-in-python/
+
 # Ask for server and ports to scan
 remote_server = input("Enter a remote host to scan: ")
 port_number = input("Enter the highest port number you want to scan: ")
