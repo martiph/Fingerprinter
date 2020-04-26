@@ -2,9 +2,9 @@ import socket
 import sys
 from datetime import datetime
 
-# copied some things from here: https://www.pythonforbeginners.com/code-snippets-source-code/port-scanner-in-python/
+# Some parts of the code were copied from here (25.04.2020): https://www.pythonforbeginners.com/code-snippets-source-code/port-scanner-in-python/
 
-# Ask for server and ports to scan
+# Display a banner with information about how to use the portscanner, if the user uses the script wrong.
 if len(sys.argv) != 2:
     print("-"*80)
     print("Usage of Fingerprinter.portscanner.py:\n./portscanner.py <target-ip-address> <highest_port_in_range>\n")
@@ -27,19 +27,16 @@ print("-" * 80)
 # Check what time the scan started
 t1 = datetime.now()
 
-# Using the range function to specify ports (here it will scans all ports between 1 and 1024)
-
-# We also put in some error handling for catching errors
-
+# Using the range function to specify ports (including error handling)
 try:
     port_number = int(port_number) + 1
     for port in range(1, port_number):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((remote_server_ip, port))
         if result == 0:
-            print("Port {}: 	 Open".format(port))
+            print("Port {}:\tOpen".format(port))
         else:
-            print("Port {}: 	 Closed".format(port))
+            print("Port {}:\tClosed".format(port))
         sock.close()
 
 except KeyboardInterrupt:
