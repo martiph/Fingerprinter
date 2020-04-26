@@ -31,6 +31,7 @@ t1 = datetime.now()
 try:
     port_number = int(port_number) + 1
     for port in range(1, port_number):
+        #TODO: Add socket_raw to build custom requests
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((remote_server_ip, port))
         if result == 0:
