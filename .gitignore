@@ -222,3 +222,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/python,windows,intellij
+
+# Custom directories and files
+./.idea
