@@ -5,7 +5,7 @@ from datetime import datetime
 # Some parts of the code were copied from here (25.04.2020): https://www.pythonforbeginners.com/code-snippets-source-code/port-scanner-in-python/
 
 # Display a banner with information about how to use the portscanner, if the user uses the script wrong.
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     print("-"*80)
     print("Usage of Fingerprinter.portscanner.py:\n./portscanner.py <target-ip-address> <highest_port_in_range>\n")
     print("Example:\n./portscanner.py 127.0.0.1 1000\nThis will scan \'localhost\' in portrange 1 to 1000 (reserved "
@@ -13,8 +13,8 @@ if len(sys.argv) != 2:
     print("-"*80)
     sys.exit()
 else:
-    remote_server = sys.argv[0]
-    port_number = sys.argv[1]
+    remote_server = sys.argv[1]
+    port_number = sys.argv[2]
     # TODO: Do some input validation on the ip address and the port number
 
 remote_server_ip = socket.gethostbyname(remote_server)
