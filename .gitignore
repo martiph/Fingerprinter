@@ -225,3 +225,4 @@ $RECYCLE.BIN/
 
 # Custom directories and files
 ./.idea
+*.iml
