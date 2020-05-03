@@ -224,5 +224,8 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/python,windows,intellij
 
 # Custom directories and files
-./.idea
+./.idea/
 *.iml
+./.idea/misc.xml
+./.idea/modules.xml
+./.idea/vcs.xml
