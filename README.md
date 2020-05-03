@@ -8,7 +8,8 @@ Welcome to the *Fingerprinter* project. The main purpose of this project is to p
 ## Installation
 
 First, make sure you have `python-3.8` locally installed and added to your PATH. Then clone this repository onto your 
-local machine and run a script of your choosing. 
+local machine and run a script of your choosing.  To install all necessary packages, consult `requirements.txt` 
+(generated using `pip freeze > requirements.txt`).
 
 ## Contribution
 
