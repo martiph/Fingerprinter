@@ -1,14 +1,44 @@
-import requests
-import sys
 import ipaddress
 import json
+import os.path
+import sys
 import urllib.request
+from datetime import datetime
 
-# check if there is, in addition to the filename, also a commandline parameter
+############################################################################################
+# Assign some variables
+############################################################################################
+script_location = os.path.dirname(os.path.abspath(__file__))
+
+if "\\" in script_location:
+    azure_file_path = script_location + "\\azure.json"
+    aws_file_path = script_location + "\\aws.json"
+elif "/" in script_location:
+    azure_file_path = script_location + "/azure.json"
+    aws_file_path = script_location + "/aws.json"
+else:
+    azure_file_path = ""
+    aws_file_path = ""
+
+current_date = datetime.now()
+current_date = current_date.strftime("%Y%m%d")
+print(current_date)
+#azure_url = "https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_" + \
+#            str(current_date) + ".json"
+azure_url = "https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20200504.json"
+# TODO get the latest version of the file (date is in the filename)
+aws_url = "https://ip-ranges.amazonaws.com/ip-ranges.json"
+
+azure_ip_subnets = []
+aws_ip_subnets = []
+
+############################################################################################
+# Check if there is, in addition to the filename, also a commandline parameter
+############################################################################################
 if len(sys.argv) != 2:
     print("-" * 80)
     print("Usage of Fingerprinter.cloudprovider_detection.py:\n./cloudprovider_detection.py <target-ip-address>\n")
-    print("Example:\n./cloudprovider_detection.py 127.0.0.1 \nThis will check if the provided \'ip-address\' is hosted "
+    print("Example:\n./cloudprovider_detection.py 8.8.8.8 \nThis will check if the provided \'ip-address\' is hosted "
           "on Azure or AWS.")
     print("-" * 80)
     sys.exit()
@@ -22,29 +52,54 @@ except ValueError:
     print("-" * 80)
     sys.exit()
 
-# Download Azure IP-Address file
-print("Look up if the ip address is in the file of azure ip's")
-# TODO maybe get the link dynamically as it may change when the file is updated from microsoft.
-azure_url = "https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20200427.json"
-urllib.request.urlretrieve(azure_url, "./azure.json")
-azure_file_content = open("./azure.json", "r")
-azure_ips = json.load(azure_file_content)
-# foreach ip subnet in the json file, append the subnet to the list azure_ip_subnet
-azure_ip_subnets = []
+############################################################################################
+# Download Azure IP-Address file. Create a list with subnets-addresses used by Azure.
+############################################################################################
+if os.path.exists(azure_file_path):
+    os.remove(azure_file_path)
+try:
+    urllib.request.urlretrieve(azure_url, azure_file_path)
+    azure_file = open(azure_file_path, "r")
+    azure_ip_dictionary = json.load(azure_file)
+    for ip_group in azure_ip_dictionary["values"]:
+        for ip_addr in ip_group["properties"]["addressPrefixes"]:
+            azure_ip_subnets.append(ipaddress.ip_network(ip_addr))
+except FileNotFoundError:
+    print("Please make sure you have read/write permissions on files in " + script_location)
+finally:
+    azure_file.close()
 
-# Download AWS IP-Address file, do the same as for the Azure subnets.
-aws_ip_subnets = []
+############################################################################################
+# Download AWS IP-Address file. Create a list with subnets-addresses used by AWS.
+############################################################################################
+if os.path.exists(aws_file_path):
+    os.remove(aws_file_path)
+try:
+    urllib.request.urlretrieve(aws_url, aws_file_path)
+    aws_file = open(aws_file_path, "r")
+    aws_ip_dictionary = json.load(aws_file)
+    for subnet_list in aws_ip_dictionary["prefixes"]:
+        aws_ip_subnets.append(ipaddress.ip_network(subnet_list["ip_prefix"]))
+    for subnet_list in aws_ip_dictionary["ipv6_prefixes"]:
+        aws_ip_subnets.append(ipaddress.ip_network(subnet_list["ipv6_prefix"]))
+except FileNotFoundError:
+    print("Please make sure you have read/write permissions on files in " + script_location)
+finally:
+    aws_file.close()
 
+############################################################################################
 # Check in which cloud the system is hosted
-if remote_ip in azure_ip_subnets:
-    print("System is hosted on Azure.")
-elif remote_ip in aws_ip_subnets:
-    print("System is hosted on AWS.")
-else:
-    print("System is neither hosted on Azure nor on AWS. It might be hosted on another cloud providers infrastructure "
-          "or on a on-premise infrastructure.")
-    sys.exit()
+############################################################################################
+for subnet in azure_ip_subnets:
+    if remote_ip in subnet:
+        print("System is hosted on Azure.")
+        sys.exit()
 
-# TODO fetch ip-addresses from the json-files of AWS and Azure.
-#  Check if the ip address in the params-field is in one of the json-files.
-#  -> determining the subnetmask of the  ip-address is required.
+for subnet in aws_ip_subnets:
+    if remote_ip in subnet:
+        print("System is hosted on AWS.")
+        sys.exit()
+
+print("System is neither hosted on Azure nor on AWS. It might be hosted on another cloud providers infrastructure or "
+      "on a on-premise infrastructure.")
+sys.exit()

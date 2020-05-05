@@ -230,3 +230,4 @@ $RECYCLE.BIN/
 /.idea/modules.xml
 /.idea/vcs.xml
 /azure.json
+/aws.json
