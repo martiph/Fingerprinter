@@ -23,23 +23,26 @@ def ip():
     # To compute the checksum, the checksum-field is set to 0.
 
     print("Please provide the values for the fields in the ip-header in HEX-format (without preceding 0x).")
-    version = input("Version: ")
-    ihl = input("Internet Header Length: ")
-    tos = input("Type of Service: ")
-    total_length = input("Total Length :")
+    # convert the HEX-values to BIN-values, https://stackoverflow.com/questions/1425493/convert-hex-to-binary
+    version = format(int(input("Version: "),16),'0>4b')
+    ihl = format(int(input("Internet Header Length: "), 16), '0>4b')
+    tos = format(int(input("Type of Service: "), 16), '0>8b')
+    total_length = format(int(input("Total Length :"), 16), '0>16b')
     result_1 = version + ihl + tos + total_length  # result of first 32-bit
 
-    identification = input("Identification: ")
-    flags = input("Flags: ")
-    fragment_offset = input("Fragment Offset: ")
+    identification = format(int(input("Identification: "), 16), '0>16b')
+    flags = format(int(input("Flags: "), 16), '0>3b')
+    fragment_offset = format(int(input("Fragment Offset: "), 16), '0>13b')
     result_2 = result_1 + identification + flags + fragment_offset  # result of second 32-bit
 
-    ttl = input("Time to live: ")
-    protocol = input("Protocol: ")
-    header_checksum = 0
+    ttl = format(int(input("Time to live: "), 16), '0>8b')
+    protocol = format(int(input("Protocol: "), 16), '0>8b')
+    header_checksum = format(int(0, 16), '0>16b')
     result_3 = result_2 + ttl + protocol + header_checksum  # result of third 32-bit
-    src_address = input("Source Address: ")
-    dest_addr = input("Destination Address: ")
+
+    src_address = format(int(input("Source Address: "), 16), '0>32b')
+    dest_addr = format(int(input("Destination Address: "), 16), '0>32b')
+
     checksum = version + ihl + tos + total_length + identification + flags + fragment_offset + ttl + protocol + src_address + dest_addr
     # TODO: Fix computation of checksum
     return checksum
