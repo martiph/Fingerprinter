@@ -23,11 +23,14 @@ def ip():
     # To compute the checksum, the checksum-field is set to 0.
 
     print("Please provide the values for the fields in the ip-header in HEX-format (without preceding 0x).")
+    
     # convert the HEX-values to BIN-values, https://stackoverflow.com/questions/1425493/convert-hex-to-binary
-    version = format(int(input("Version: "),16),'0>4b')
-    ihl = format(int(input("Internet Header Length: "), 16), '0>4b')
-    tos = format(int(input("Type of Service: "), 16), '0>8b')
-    total_length = format(int(input("Total Length :"), 16), '0>16b')
+    # the tilde will do a bitwise negation of the provided value
+
+    version = ~hex(int(input("Version: "),16))
+    ihl = ~hex(int(input("Internet Header Length: "), 16))
+    tos = ~hex(int(input("Type of Service: "), 16))
+    total_length = ~hex(int(input("Total Length :"), 16))
     result_1 = version + ihl + tos + total_length  # result of first 32-bit
 
     identification = format(int(input("Identification: "), 16), '0>16b')
@@ -40,10 +43,11 @@ def ip():
     header_checksum = format(int(0, 16), '0>16b')
     result_3 = result_2 + ttl + protocol + header_checksum  # result of third 32-bit
 
-    src_address = format(int(input("Source Address: "), 16), '0>32b')
-    dest_addr = format(int(input("Destination Address: "), 16), '0>32b')
+    src_address = hex(int(input("Source Address: "), 16))
+    dest_addr = hex(int(input("Destination Address: "), 16))
 
     checksum = version + ihl + tos + total_length + identification + flags + fragment_offset + ttl + protocol + src_address + dest_addr
+    checksum = ~checksum & 0xffff
     # TODO: Fix computation of checksum
     return checksum
 
