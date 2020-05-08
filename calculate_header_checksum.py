@@ -22,34 +22,39 @@ def ip():
     # Example Internet Datagram Header
     # To compute the checksum, the checksum-field is set to 0.
 
-    print("Please provide the values for the fields in the ip-header in HEX-format (without preceding 0x).")
-    
+    print("Please provide the 16-bit words in HEX-format (without preceding 0x). Example for a 16-bit word: abcd")
+    print("It is assumed that the IHL is 5.")
+
     # convert the HEX-values to BIN-values, https://stackoverflow.com/questions/1425493/convert-hex-to-binary
     # the tilde will do a bitwise negation of the provided value
+    word = []
+    word.append(int(input("Version, IHL and ToS: "), 16))
+    word.append(int(input("Total Length: "), 16))
+    word.append(int(input("Identification: "), 16))
+    word.append(int(input("Flags and Fragment Offset: "), 16))
+    word.append(int(input("TTL and Protocol: "), 16))
+    word.append(int("0", 16))  # checksum-field is during the computation set to 0
+    word.append(int(input("First Part of Source IP-Address: "), 16))
+    word.append(int(input("Second Part of Source IP-Address: "), 16))
+    word.append(int(input("First Part of Destination IP-Address: "), 16))
+    word.append(int(input("Second Part of Destination IP-Address: "), 16))
+    # word.append(int(input("Options: "), 16))
+    # word.append(int(input("Options and Padding: "), 16))
 
-    version = ~hex(int(input("Version: "),16))
-    ihl = ~hex(int(input("Internet Header Length: "), 16))
-    tos = ~hex(int(input("Type of Service: "), 16))
-    total_length = ~hex(int(input("Total Length :"), 16))
-    result_1 = version + ihl + tos + total_length  # result of first 32-bit
-
-    identification = format(int(input("Identification: "), 16), '0>16b')
-    flags = format(int(input("Flags: "), 16), '0>3b')
-    fragment_offset = format(int(input("Fragment Offset: "), 16), '0>13b')
-    result_2 = result_1 + identification + flags + fragment_offset  # result of second 32-bit
-
-    ttl = format(int(input("Time to live: "), 16), '0>8b')
-    protocol = format(int(input("Protocol: "), 16), '0>8b')
-    header_checksum = format(int(0, 16), '0>16b')
-    result_3 = result_2 + ttl + protocol + header_checksum  # result of third 32-bit
-
-    src_address = hex(int(input("Source Address: "), 16))
-    dest_addr = hex(int(input("Destination Address: "), 16))
-
-    checksum = version + ihl + tos + total_length + identification + flags + fragment_offset + ttl + protocol + src_address + dest_addr
-    checksum = ~checksum & 0xffff
-    # TODO: Fix computation of checksum
-    return checksum
+    checksum = ones_complement_addition(word[0], word[1])  # result of first 32-bit
+    for i in range(2, len(word)):
+        checksum = ones_complement_addition(checksum, word[i])
+    checksum = list(bin(checksum))
+    for i in range(2, len(checksum)):
+        if checksum[i] == '0':
+            checksum[i] = '1'
+        elif checksum[i] == '1':
+            checksum[i] = '0'
+        else:
+            # this should be an unreachable code section
+            print("Checksum is broken. Please contact the developer.")
+    checksum = int(''.join(checksum), 2)
+    return hex(checksum)
 
 
 def tcp():
@@ -58,20 +63,54 @@ def tcp():
     return checksum
 
 
-if len(sys.argv) == 2:
-    if sys.argv[1] == "ip":
-        print(ip())
-        sys.exit()
-    elif sys.argv[1] == "tcp":
-        print(tcp())
-        sys.exit()
+def ones_complement_addition(number1, number2):
+    # to see how the one's complement addition works, visit: https://youtu.be/EmUuFRMJbss
+
+    if not (isinstance(number1, int)) and not (isinstance(number2, int)):
+        return None
+    result = bin(number1 + number2)  # string will begin with '0b', just ignore result[0] and result[1]
+    if len(result) > 18:
+        if len(result) == 19 and result[2] == '1':
+            print("carry bit needed")
+            carry_bit = result[2]
+            result = list(result)  # convert the string to a list
+            result.pop(2)
+            print(result)
+            for i in range(1, 17):
+                if result[-i] == '0' and carry_bit == '1':
+                    result[-i] = '1'
+                    carry_bit = '0'
+                elif result[-i] == '1':
+                    result[-i] = '0'
+                    carry_bit = '1'
+                elif carry_bit == '0':
+                    break
+                else:
+                    # this should never be executed
+                    carry_bit = '0'
+            result = ''.join(result)  # convert the list to a string
+    return int(result, 2)
+
+
+def main(protocol):
+    if "ip" in protocol or "tcp" in protocol:
+        if "ip" in protocol:
+            print(ip())
+            sys.exit()
+        elif "tcp" in protocol:
+            print(tcp())
+            sys.exit()
+        else:
+            print("No valid parameter was provided. Please use 'ip' or 'tcp' as parameter.")
+            sys.exit()
     else:
-        print("No valid script parameter was provided. Please use 'ip' or 'tcp' as parameter.")
-        sys.exit()
-else:
-    print("-"*80)
-    print("Usage of Fingerprinter.calculate_header_checksum.py:\npython ./calculate_header_checksum.py <ip | tcp>\n")
-    print("Example:\n./calculate_header_checksum.py 'ip'")
-    print("This will ask you to provide the values of every field in the IPv4-header.")
-    print("-"*80)
-    sys.exit(1)
+        print("-" * 80)
+        print(
+            "Usage of Fingerprinter.calculate_header_checksum.py:\npython ./calculate_header_checksum.py <ip | tcp>\n")
+        print("Example:\n./calculate_header_checksum.py 'ip'")
+        print("This will ask you to provide the values of every field in the IPv4-header.")
+        print("-" * 80)
+        sys.exit(1)
+
+
+main(input("IP or TCP checksum? "))
