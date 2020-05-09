@@ -40,8 +40,6 @@ def ip(packet=""):
         print("Please provide the 16-bit words in HEX-format (without preceding 0x). Example for a 16-bit word: abcd")
         print("It is assumed that the IHL is 5.")
 
-        # convert the HEX-values to BIN-values, https://stackoverflow.com/questions/1425493/convert-hex-to-binary
-        # the tilde will do a bitwise negation of the provided value
         word = []
         word.append(int(input("Version, IHL and ToS: "), 16))
         word.append(int(input("Total Length: "), 16))
@@ -61,12 +59,11 @@ def ip(packet=""):
     if len(checksum) < 18:  # add leading zeros
         partial_checksum = checksum[2:]
         while len(partial_checksum) < 16:
-            partial_checksum = '0'+partial_checksum
-        checksum = '0b'+partial_checksum
+            partial_checksum = '0' + partial_checksum
+        checksum = '0b' + partial_checksum
     checksum = list(checksum)
 
-    for i in range(2, len(checksum)):
-        # flip the bits
+    for i in range(2, len(checksum)):  # flip the bits
         if checksum[i] == '0':
             checksum[i] = '1'
         elif checksum[i] == '1':
@@ -80,10 +77,11 @@ def ip(packet=""):
     return hex(checksum)
 
 
-def tcp():
+def tcp(src_ip, dest_ip, protocol, segment):
     # create the pseudo header: src ip, dest ip, 1 byte reserved (0-filled), protocol from ip-header, tcp segment length
     # calculate checksum over pseudo header and the whole tcp segment
     # the algorithm to calculate the checksum is the same as for ip-header checksum
+    tcp_segment = ""
     checksum = ""
     # TODO: Add computation of checksum
     return checksum
@@ -99,8 +97,8 @@ def ones_complement_addition(number1, number2):
         if len(result) < 18:  # add leading zeros
             partial_result = result[2:]
             while len(partial_result) < 16:
-                partial_result = '0'+partial_result
-            result = '0b'+partial_result
+                partial_result = '0' + partial_result
+            result = '0b' + partial_result
     if len(result) > 18:
         if len(result) == 19 and result[2] == '1':
             print("carry bit needed")
@@ -130,7 +128,7 @@ def main(protocol):
             print(ip())
             sys.exit()
         elif "tcp" in protocol:
-            print(tcp())
+            print(tcp("", "", "", ""))
             sys.exit()
         else:
             print("No valid parameter was provided. Please use 'ip' or 'tcp' as parameter.")
@@ -144,5 +142,4 @@ def main(protocol):
         print("-" * 80)
         sys.exit(1)
 
-
-#main(input("IP or TCP checksum? "))
+# main(input("IP or TCP checksum? "))
