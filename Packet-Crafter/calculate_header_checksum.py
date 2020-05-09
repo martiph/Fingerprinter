@@ -52,39 +52,65 @@ def ip(packet=""):
         word.append(int(input("First Part of Destination IP-Address: "), 16))
         word.append(int(input("Second Part of Destination IP-Address: "), 16))
 
-    checksum = ones_complement_addition(word[0], word[1])  # result of first 32-bit
-    for i in range(2, len(word)):
-        checksum = ones_complement_addition(checksum, word[i])
-    checksum = bin(checksum)
-    if len(checksum) < 18:  # add leading zeros
-        partial_checksum = checksum[2:]
-        while len(partial_checksum) < 16:
-            partial_checksum = '0' + partial_checksum
-        checksum = '0b' + partial_checksum
-    checksum = list(checksum)
-
-    for i in range(2, len(checksum)):  # flip the bits
-        if checksum[i] == '0':
-            checksum[i] = '1'
-        elif checksum[i] == '1':
-            checksum[i] = '0'
-        else:
-            # this should be an unreachable code section
-            print("Checksum is broken. Please contact the developer.")
-    print("Checksum as list: " + ''.join(checksum))
-    checksum = int(''.join(checksum), 2)
-    print("Checksum as Integer: " + str(checksum))
+    checksum = calc_checksum(word)
+    print("Checksum as Integer (DEC): " + str(checksum))
     return hex(checksum)
 
 
-def tcp(src_ip, dest_ip, protocol, segment):
+def tcp(src_ip, dest_ip, protocol="06", tcp_segment=""):
+    # 0                   1                   2                   3
+    # 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |          Source Port          |       Destination Port        |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |                        Sequence Number                        |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |                    Acknowledgment Number                      |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |  Data |           |U|A|P|R|S|F|                               |
+    # | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
+    # |       |           |G|K|H|T|N|N|                               |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |           Checksum            |         Urgent Pointer        |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |                    Options                    |    Padding    |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    # |                             data                              |
+    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    #
+    # TCP Header Format
+
     # create the pseudo header: src ip, dest ip, 1 byte reserved (0-filled), protocol from ip-header, tcp segment length
     # calculate checksum over pseudo header and the whole tcp segment
     # the algorithm to calculate the checksum is the same as for ip-header checksum
-    tcp_segment = ""
-    checksum = ""
-    # TODO: Add computation of checksum
-    return checksum
+    tcp_segment = tcp_segment.split()
+    for i in range(len(tcp_segment)):  # do some input validation
+        try:
+            if len(tcp_segment[i]) != 4:
+                raise ValueError
+            hex(int(tcp_segment[i], 16))
+        except TypeError:
+            print("Your package is broken. You must provide HEX-values.")
+            return None
+        except ValueError:
+            print("Please provide the input in form of 16-bit HEX-words separated by a whitespace.")
+            return None
+    segment_length = 0  # 16 bit long, shows how long the whole segment in bytes is
+    segment_list = tcp_segment.list(" ")
+    for word in segment_list:
+        segment_length += 2
+    segment_length = hex(segment_length)[2:]
+    pseudo_header = src_ip + " " + dest_ip + " 00" + protocol + " " + segment_length  # 96 bit long (3 x 32 bit)
+    pseudo_complete_segment = pseudo_header + tcp_segment
+    if len(pseudo_complete_segment) % 2 == 1:
+        pseudo_complete_segment += " 0000"
+    pseudo_complete_segment = pseudo_complete_segment.split(" ")
+
+    for i in range(len(pseudo_complete_segment)):
+        pseudo_complete_segment[i] = int(pseudo_complete_segment[i], 16)
+
+    checksum = calc_checksum(pseudo_complete_segment)
+    return hex(checksum)
 
 
 def ones_complement_addition(number1, number2):
@@ -120,6 +146,37 @@ def ones_complement_addition(number1, number2):
                     carry_bit = '0'
             result = ''.join(result)  # convert the list to a string
     return int(result, 2)
+
+
+def calc_checksum(segment):
+    # `segment` needs to be a list with integers
+    # this function is only for use in environments where 16-bit words are used.
+    # TODO: Add validation for the parameter
+
+    print("Calculating the checksum...")
+    checksum = ones_complement_addition(segment[0], segment[1])
+    for i in range(2, len(segment)):
+        checksum = ones_complement_addition(checksum, segment[i])
+    checksum = bin(checksum)
+
+    if len(checksum) < 18:  # add leading zeros
+        partial_checksum = checksum[2:]
+        while len(partial_checksum) < 16:
+            partial_checksum = '0' + partial_checksum
+        checksum = '0b' + partial_checksum
+    checksum = list(checksum)
+
+    for i in range(2, len(checksum)):  # flip the bits
+        if checksum[i] == '0':
+            checksum[i] = '1'
+        elif checksum[i] == '1':
+            checksum[i] = '0'
+        else:
+            # this should be an unreachable code section
+            print("Checksum is broken. Please contact the developer.")
+    print("Checksum as list: " + ''.join(checksum))
+    checksum = int(''.join(checksum), 2)
+    return checksum
 
 
 def main(protocol):
