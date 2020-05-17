@@ -1,11 +1,11 @@
 import ipaddress
 import json
 import os.path
+import sys
 import urllib.request
 from datetime import date, timedelta
 
 import requests
-import sys
 
 ############################################################################################
 # Assign some variables
