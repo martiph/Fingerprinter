@@ -35,12 +35,6 @@ ip_checksum = calc_check.ip(ip_header)
 ip_header = ip_header.split(' ')
 ip_header[5] = ip_checksum[2:]  # return value of calc_check.ip() is prefixed with '0x'
 
-src_ip = [ip_header[6], ip_header[7]]
-src_ip = ' '.join(src_ip)
-dest_ip = [ip_header[8], ip_header[9]]
-dest_ip = ' '.join(dest_ip)
-protocol = ip_header[4][2:]
-
 tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header + ' ' + tcp_payload)
 tcp_header = tcp_header.split(' ')
 tcp_header[8] = tcp_checksum[2:]  # return value of calc_check.tcp() is prefixed with '0x'
