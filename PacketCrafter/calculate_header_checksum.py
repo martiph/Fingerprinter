@@ -125,12 +125,13 @@ def tcp(ip_packet):
     internet_header_length = ip_packet[0][1]
     internet_header_length = int(internet_header_length, 16) * 4  # IHL in bytes
 
-    ip_header = ip_packet[:(internet_header_length / 2)]  # ip-packet is a list with 16-bit words, not with bytes
-    tcp_segment = ip_packet[(internet_header_length / 2):]
+    end_of_ip_header = int(internet_header_length / 2)  # index of first 16-bit word after the ip-header
+    ip_header = ip_packet[:end_of_ip_header]
+    tcp_segment = ip_packet[end_of_ip_header:]
 
-    protocol = ip_header[9][2:]  # next-level protocol field from the ip-header
-    src_ip = ' '.join([ip_header[12], ip_header[13]])  # source ip-address in hex format
-    dest_ip = ' '.join([ip_header[14], ip_header[15]])  # destination ip-address in hex format
+    protocol = ip_header[4][2:]  # next-level protocol field from the ip-header
+    src_ip = ' '.join([ip_header[6], ip_header[7]])  # source ip-address in hex format
+    dest_ip = ' '.join([ip_header[8], ip_header[9]])  # destination ip-address in hex format
 
     # calculate the total length of the ip-packet in bytes (later used for determining the tcp-segment length)
     if len(ip_packet[-1]) == 4:
@@ -292,5 +293,5 @@ def main(protocol):
 # to calculate the checksum for the packet crafter:
 # print(ip("4500 003b abcd 0000 4006 0000 ac11 b0b1 ac11 b0b3"))
 
-print(tcp("4500 003c abcd 0000 4006 caf2 c0a8 c151 c0a8 c159 ff98 0050 0000 0000 0000 0000 5002 7110 3ad9 0000 0000 "
-          "0000 0000 0000 0000 0000 0000 0000 0000 0000"))
+# print(tcp("4500 003c abcd 0000 4006 caf2 c0a8 c151 c0a8 c159 ff98 0050 0000 0000 0000 0000 5002 7110 3ad9 0000 0000
+# 0000 0000 0000 0000 0000 0000 0000 0000 0000"))
