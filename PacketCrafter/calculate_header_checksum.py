@@ -101,7 +101,7 @@ def tcp(ip_packet):
 
 
     :param ip_packet: A complete IP-packet (inclusive payload), with 'next-level protocol' set to 06 (TCP).
-    :return: Checksum of the TCP-segment provided in the payload of the IP-packet
+    :return: Checksum of the TCP-segment provided in the payload of the IP-packet (as HEX-Value, including leading '0x')
     """
 
     print("Started calculating the tcp checksum with ip-packet: " + ip_packet)
