@@ -128,21 +128,15 @@ def tcp(ip_packet):
     end_of_ip_header = int(internet_header_length / 2)  # index of first 16-bit word after the ip-header
     ip_header = ip_packet[:end_of_ip_header]
     tcp_segment = ip_packet[end_of_ip_header:]
+    while len(tcp_segment[-1]) < 4:
+        tcp_segment[-1] = tcp_segment[-1] + '0'
 
     protocol = ip_header[4][2:]  # next-level protocol field from the ip-header
     src_ip = ' '.join([ip_header[6], ip_header[7]])  # source ip-address in hex format
     dest_ip = ' '.join([ip_header[8], ip_header[9]])  # destination ip-address in hex format
 
-    # calculate the total length of the ip-packet in bytes (later used for determining the tcp-segment length)
-    if len(ip_packet[-1]) == 4:
-        ip_total_length = 2 * len(ip_packet)
-    elif len(ip_packet[-1]) == 2:
-        ip_total_length = 2 * len(ip_packet) - 1
-        tcp_segment[-1] = tcp_segment[-1] + '00'  # for checksum-calculation, add trailing zeros (according to RFC 793)
-    else:
-        # this case does not exist
-        ip_total_length = 0
-        raise Exception
+    # extract the total length of the ip-packet in bytes (later used for determining the tcp-segment length)
+    ip_total_length = int(ip_header[1], 16)
 
     # Length of the TCP-segment in bytes (field is 16 bit long),  used in the pseudo header, calculation is done
     # according to the calculation in wireshark
@@ -291,7 +285,6 @@ def main(protocol):
 
 
 # to calculate the checksum for the packet crafter:
-# print(ip("4500 003b abcd 0000 4006 0000 ac11 b0b1 ac11 b0b3"))
+# print(ip("4500 003c abcd 0000 4006 0000 c0a8 c151 c0a8 c159"))
 
-# print(tcp("4500 003c abcd 0000 4006 caf2 c0a8 c151 c0a8 c159 ff98 0050 0000 0000 0000 0000 5002 7110 3ad9 0000 0000
-# 0000 0000 0000 0000 0000 0000 0000 0000 0000"))
+# print(tcp("4500 003c abcd 0000 4006 caf2 c0a8 c151 c0a8 c159 ff98 0050 0000 0000 0000 0000 5002 7110 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000"))
