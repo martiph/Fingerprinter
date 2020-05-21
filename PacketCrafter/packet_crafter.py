@@ -15,24 +15,25 @@ def convert_ip_address(ip_address):
         return None
     ip_addr = ip_address.split('.')
     for i in range(4):
-        ip_addr[i] = hex(int(ip_addr))[2:]
+        ip_addr[i] = hex(int(ip_addr[i]))[2:]
         while len(ip_addr[i]) < 2:
-            ip_addr = '0' + ip_addr
+            ip_addr[i] = '0' + ip_addr[i]
     ip_address = ip_addr[0] + ip_addr[1] + ' ' + ip_addr[2] + ip_addr[3]
     return ip_address
 
 
 # Tutorial on how to craft manually a raw ip-packet:
 # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
+# https://www.binarytides.com/raw-socket-programming-in-python-linux/
 
 
 # variables
-src_ip = '192.168.0.158'
-dest_ip = '192.168.0.43'
+src_ip = '192.168.100.10'
+dest_ip = '192.168.100.20'
 
 
 # create a raw IPv4 socket
-s = socket.socket(socket.AF_INET, socket.SOCK_RAW)
+s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
 # set the socket option IP_HDRINCL to 1, to tell the kernel that a ip-header is provided
 s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
