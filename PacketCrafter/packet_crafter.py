@@ -70,7 +70,7 @@ remote_ip = str(int(ip_header[8][:2], 16)) + '.' + str(int(ip_header[8][2:], 16)
     int(ip_header[9][:2], 16)) + '.' + str(int(ip_header[9][2:], 16))
 dest_port = int(tcp_header.split(' ')[1], 16)
 
-tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header)  # + ' ' + tcp_payload)
+tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header + ' ' + tcp_payload)
 tcp_header = tcp_header.split(' ')
 tcp_header[8] = tcp_checksum[2:]  # return value of calc_check.tcp() is prefixed with '0x'
 

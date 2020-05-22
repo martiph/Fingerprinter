@@ -1,72 +1,63 @@
 import sys
 
 
-def ip(packet):
+def ip(packet: str):
     """
     Used to calculate the checksum of an IP-Packet
 
+    source: RFC 791; https://tools.ietf.org/html/rfc791#section-3.1
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |Version|  IHL  |Type of Service|          Total Length         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |         Identification        |Flags|      Fragment Offset    |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |  Time to Live |    Protocol   |         Header Checksum       |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                       Source Address                          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                    Destination Address                        |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                    Options                    |    Padding    |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-    :param packet: The IP-packet header, in form of 16-bit words in HEX (without preceding 0x)
-    :return:
+    Example Internet Datagram Header
+    To compute the checksum, the checksum-field is set to 0.
+
+    :param packet: The IP-packet header as a string, in form of 16-bit words in HEX (without preceding 0x)
+    :return: IP-Header checksum as HEX-value (inclusive preceeding '0x'), as a string
     """
-    # source: RFC 791; https://tools.ietf.org/html/rfc791#section-3.1
-    # 0                   1                   2                   3
-    # 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |Version|  IHL  |Type of Service|          Total Length         |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |         Identification        |Flags|      Fragment Offset    |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |  Time to Live |    Protocol   |         Header Checksum       |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |                       Source Address                          |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |                    Destination Address                        |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    # |                    Options                    |    Padding    |
-    # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    #
-    # Example Internet Datagram Header
-    # To compute the checksum, the checksum-field is set to 0.
-    if packet == "":
-        print("Please provide the 16-bit words in HEX-format (without preceding 0x). Example for a 16-bit ip_header: "
-              "abcd")
-        print("It is assumed that the IHL is 5.")
+    print("Started calculating the ip header checksum for packet: " + packet)
 
-        ip_header = []
-        ip_header.append(int(input("Version, IHL and ToS: "), 16))
-        ip_header.append(int(input("Total Length: "), 16))
-        ip_header.append(int(input("Identification: "), 16))
-        ip_header.append(int(input("Flags and Fragment Offset: "), 16))
-        ip_header.append(int(input("TTL and Protocol: "), 16))
-        ip_header.append(int("0", 16))  # checksum-field is during the computation set to 0
-        ip_header.append(int(input("First Part of Source IP-Address: "), 16))
-        ip_header.append(int(input("Second Part of Source IP-Address: "), 16))
-        ip_header.append(int(input("First Part of Destination IP-Address: "), 16))
-        ip_header.append(int(input("Second Part of Destination IP-Address: "), 16))
-    else:
-        ip_header = packet.split(" ")
+    # Do some input validation.
+    try:
+        if not isinstance(packet, str):
+            raise TypeError("Parameter not of type 'string'")
+        ip_header = packet.split(' ')
+        for i in range(len(ip_header)):
+            if len(ip_header[i]) != 4:
+                raise ValueError("A 16-bit word in HEX-format consists of four characters.")
+            hex(int(ip_header[i], 16))
+    except TypeError:
+        print("Your packet is of wrong type.")
+        return None
+    except ValueError:
+        print("Your packet has wrong values")
+        return None
 
-    for i in range(len(ip_header)):  # do some input validation
-        print(ip_header[i])
-        if len(ip_header[i]) != 4:
-            try:
-                hex(int(ip_header[i], 16))
-            except TypeError:
-                print("TypeError occurred.")
-            finally:
-                print("Word " + ip_header[i] + " does not meet the expected format. You must provide a string with "
-                                               "multiple four HEX-value words separated by a whitespace.")
-                return None
+    # prepare the ip-header for the checksum calculation
+    for i in range(len(ip_header)):
         ip_header[i] = int(ip_header[i], 16)
-        print(ip_header[i])
+        if not isinstance(ip_header[i], int):
+            return None
 
     checksum = calc_checksum(ip_header)
     print("Checksum as Integer (DEC): " + str(checksum))
     return hex(checksum)
 
 
-def tcp(ip_packet):
+def tcp(ip_packet: str):
     """
     Calculate the checksum in a tcp-segment
 
@@ -108,11 +99,11 @@ def tcp(ip_packet):
     # Do some input validation.
     try:
         if not isinstance(ip_packet, str):
-            raise TypeError
-        ip_packet = ip_packet.split(" ")
+            raise TypeError("Parameter not of type 'string'")
+        ip_packet = ip_packet.split(' ')
         for i in range(len(ip_packet)):
             if (len(ip_packet[i]) != 4) and (i != (len(ip_packet) - 1)):
-                raise ValueError
+                raise ValueError("A 16-bit word in HEX-format consists of four characters.")
             hex(int(ip_packet[i], 16))
     except TypeError:
         print("Your package is broken. You must provide HEX-values.")
@@ -171,7 +162,7 @@ def ones_complement_addition(number1, number2):
     :return: One's complement of the two numbers
     """
 
-    print("calculating the one's complement of " + str(number1) + " + " + str(number2))
+    # print("calculating the one's complement of " + str(number1) + " + " + str(number2))
     if not (isinstance(number1, int)) and not (isinstance(number2, int)):
         return None
     result = bin(number1 + number2)  # string will begin with '0b', just ignore result[0] and result[1]
@@ -184,11 +175,11 @@ def ones_complement_addition(number1, number2):
 
     if len(result) > 18:
         if len(result) == 19 and result[2] == '1':
-            print("carry bit needed")
+            # print("carry bit needed")
             carry_bit = '1'
             result = list(result)  # convert the string to a list
             result.pop(2)
-            print(result)
+            # print(result)
             for i in range(1, 17):
                 if result[-i] == '0' and carry_bit == '1':
                     result[-i] = '1'
@@ -219,12 +210,14 @@ def calc_checksum(packet):
     # validate the input
     try:
         if not isinstance(packet, list):
-            raise TypeError
+            raise TypeError("Packet " + str(packet) + "is not of type 'list'")
         for i in range(len(packet)):
-            if not isinstance(packet, int):
-                raise TypeError
-    except TypeError:
+            if not isinstance(packet[i], int):
+                raise TypeError(
+                    "Value " + str(packet[i]) + " on position " + str(i) + " in the packet is not of type 'int'")
+    except TypeError as te:
         print("Wrong type used for method 'calc_checksum(packet)'")
+        print(te)
 
     print("Calculating the checksum...")
     checksum = ones_complement_addition(packet[0], packet[1])
@@ -271,7 +264,6 @@ def main(protocol):
         print("This will ask you to provide the values of every field in the IPv4-header.")
         print("-" * 80)
         sys.exit(1)
-
 
 # main(input("IP or TCP checksum? "))
 
