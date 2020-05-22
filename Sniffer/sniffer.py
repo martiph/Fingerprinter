@@ -1,6 +1,6 @@
-import socket
 import platform
-
+import socket
+import sys
 
 # tutorial on https://www.binarytides.com/python-packet-sniffer-code-linux/
 # another tutorial https://www.bitforestinfo.com/2017/01/how-to-write-simple-packet-sniffer.html
@@ -10,13 +10,17 @@ if platform.system() == 'Linux':
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
 elif platform.system() == 'Windows':
     # for windows
-    s = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_IP)
+    s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
     s.bind(("192.168.0.158", 0))
-    s.setsockopt(socket.IPPROTO_IP,socket.IP_HDRINCL,1)
-    s.ioctl(socket.SIO_RCVALL,socket.RCVALL_ON)
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    s.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 else:
     raise NotImplementedError("Function not implemented for your operating system.")
 
 # receive a packet
-while True:
-    print(s.recvfrom(65565))
+try:
+    while True:
+        print(s.recvfrom(65565))
+except KeyboardInterrupt:
+    print("You pressed Ctrl+C\nStop sniffing...")
+    sys.exit()
