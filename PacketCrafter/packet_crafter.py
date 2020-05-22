@@ -42,11 +42,11 @@ s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 ip_header = '4500 003c'  # Version, IHL, Type of Service | Total Length (inclusive data, in bytes)
 ip_header += ' abcd 0000'  # Identification | Flags, Fragment Offset
 ip_header += ' 4006 0000'  # TTL, Protocol | Header Checksum
-ip_header += ' ' + convert_ip_address(src_ip)  # Source Address 172.17.232.161
-ip_header += ' ' + convert_ip_address(dest_ip)  # Destination Address 172.17.232.161
+ip_header += ' ' + convert_ip_address(src_ip)  # Source Address
+ip_header += ' ' + convert_ip_address(dest_ip)  # Destination Address
 
 # create the tcp-header
-tcp_header = 'ff99 ff98'  # Source Port (65433) | Destination Port (65432)
+tcp_header = 'ff98 0050'  # Source Port (65432) | Destination Port (80)
 tcp_header += ' 0000 0000'  # Sequence Number
 tcp_header += ' 0000 0000'  # Acknowledgement Number
 tcp_header += ' 5002 7110'  # Data Offset, Reserved, Flags | Window Size
@@ -93,5 +93,3 @@ print("Packet sent, " + str(value) + " bytes sent")
 data = s.recv(4096).hex()
 print(repr(data))
 s.close()
-
-# values to test: src_ip: 172.17.232.161; dest_ip: 172.17.232.161
