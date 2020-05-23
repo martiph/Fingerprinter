@@ -231,3 +231,4 @@ $RECYCLE.BIN/
 /.idea/vcs.xml
 /azure.json
 /aws.json
+/.vscode/
