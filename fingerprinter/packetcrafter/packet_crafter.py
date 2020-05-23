@@ -1,6 +1,7 @@
 import threading
 import re
 import socket
+import queue
 import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
 import fingerprinter.sniffer.sniffer as sniffer
 
@@ -39,7 +40,7 @@ def convert_port(port: int):
 
 def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
     recv_data = sniffer.sniff(src_ip, src_port, dest_ip, dest_port, ack_number)
-    return recv_data
+    q.put(recv_data)
 
 
 # Tutorial on how to craft manually a raw ip-packet:
@@ -100,8 +101,11 @@ print("Packet to send: " + packet)
 packet = bytes.fromhex(packet)
 
 # start receiving socket, search for packets coming from the current destination host
-recv_socket_thread = threading.Thread(target=receive_data_socket(dest_ip, dest_port, src_ip, src_port, current_ack_number + 1))
-recv_socket_thread.start()
+# the thread is used because the sniffer could start too slow if it would be started after the sending of the packet
+# the answer from the thread is written to the queue
+q = queue.Queue()
+sniffer_thread = threading.Thread(target=receive_data_socket, args=(dest_ip, dest_port, src_ip, src_port, current_ack_number + 1))
+sniffer_thread.start()
 
 # connect to the remote system
 print("Trying to send data to " + dest_ip + " on port " + str(dest_port))
@@ -109,5 +113,6 @@ value = s.sendto(packet, (dest_ip, dest_port))
 print("Packet sent, " + str(value) + " bytes sent")
 
 # wait for the answer
-recv_socket_thread.join()
+sniffer_thread.join()
+print(q.get())
 s.close()
