@@ -1,5 +1,5 @@
 import unittest
-import PacketCrafter.packet_crafter as pc
+import fingerprinter.packetcrafter.packet_crafter as pc
 
 
 class PacketCrafterTest(unittest.TestCase):

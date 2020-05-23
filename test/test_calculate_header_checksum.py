@@ -1,5 +1,5 @@
 import unittest
-import PacketCrafter.calculate_header_checksum as calc_check
+import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
 
 
 class CalculateHeaderChecksumTestCase(unittest.TestCase):
