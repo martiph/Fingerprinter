@@ -1,7 +1,8 @@
-import sys
+import threading
 import re
 import socket
-import calculate_header_checksum as calc_check
+import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
+import fingerprinter.sniffer.sniffer as sniffer
 
 
 def convert_ip_address(ip_address: str):
@@ -36,9 +37,15 @@ def convert_port(port: int):
     return port
 
 
+def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
+    recv_data = sniffer.sniff(src_ip, src_port, dest_ip, dest_port, ack_number)
+    return recv_data
+
+
 # Tutorial on how to craft manually a raw ip-packet:
 # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
 # https://www.binarytides.com/raw-socket-programming-in-python-linux/
+# more information about raw socket: man 7 socket
 
 
 # variables
@@ -83,21 +90,24 @@ tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header + ' ' + tcp
 tcp_header = tcp_header.split(' ')
 tcp_header[8] = tcp_checksum[2:]  # return value of calc_check.tcp() is prefixed with '0x'
 
+current_ack_number = int(''.join(tcp_header[4:6]), 16)
 ip_header = ' '.join(ip_header)
 tcp_header = ' '.join(tcp_header)
 
 # assemble the packet
 packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
-# packet = packet.replace(' ', '')
 print("Packet to send: " + packet)
 packet = bytes.fromhex(packet)
-# print(packet)
-# print(packet.hex())
+
+# start receiving socket, search for packets coming from the current destination host
+recv_socket_thread = threading.Thread(target=receive_data_socket(dest_ip, dest_port, src_ip, src_port, current_ack_number + 1))
+recv_socket_thread.start()
 
 # connect to the remote system
 print("Trying to send data to " + dest_ip + " on port " + str(dest_port))
 value = s.sendto(packet, (dest_ip, dest_port))
 print("Packet sent, " + str(value) + " bytes sent")
-data = s.recv(4096).hex()
-print(repr(data))
+
+# wait for the answer
+recv_socket_thread.join()
 s.close()
