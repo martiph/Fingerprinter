@@ -6,15 +6,11 @@ import sys
 # another tutorial https://www.bitforestinfo.com/2017/01/how-to-write-simple-packet-sniffer.html
 # yet another tutorial https://mspyzblog.wordpress.com/2017/10/02/code-a-network-packet-sniffer-in-python-for-linux/
 
-HOST = '192.168.100.10'
-PORT = 0
-
-
 def create_ip_dict():
     """
     Creates a dictionary with all fields of IP-header, TCP-header and an element for the TCP-data
 
-    IP-options and TCP-options include always padding
+    IP-options and TCP-options always include padding
 
     :return: ip_dict
     """
@@ -49,6 +45,7 @@ def create_ip_dict():
 
 def parse(ip_packet: str):
     """
+    Extract the values for different fields from the provided IP-packet
 
     :param ip_packet: String consisting of IP-Header, TCP-Header and TCP-Data in HEX-format
     :return:
@@ -113,7 +110,7 @@ def parse(ip_packet: str):
     packet_dict["urgent_pointer"] = tcp_segment[36:40]
 
     if tcp_data_start > 40:
-        packet_dict["options"] = tcp_segment[40:tcp_data_start]
+        packet_dict["tcp_options"] = tcp_segment[40:tcp_data_start]
     packet_dict["tcp_data"] = tcp_segment[tcp_data_start:]
 
     return packet_dict
@@ -141,7 +138,8 @@ def sniff(src_ip, src_port, dest_ip, dest_port, ack_number):
         # windows sockets work a little bit different than linux sockets, IPPROTO_IP can be used
         print("Your operating system was determined as " + platform.system())
         s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
-        s.bind((HOST, PORT))
+        # bind socket to the destination host (host from where the original request was sent)
+        s.bind((dest_ip, dest_port))
         s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
         s.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
     else:

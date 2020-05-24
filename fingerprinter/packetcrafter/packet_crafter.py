@@ -12,6 +12,8 @@ src_port = 65432
 dest_ip = '192.168.100.20'
 dest_port = 80
 
+q = queue.Queue()
+
 
 def convert_ip_address(ip_address: str):
     """
@@ -50,70 +52,75 @@ def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
     q.put(recv_data)
 
 
-# Tutorial on how to craft manually a raw ip-packet:
-# https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
-# https://www.binarytides.com/raw-socket-programming-in-python-linux/
-# more information about raw socket: man 7 socket
-# some information about sockets: https://realpython.com/python-sockets/
+def send_packet(packet: bytes, current_ack_number: int):
+    # Tutorial on how to craft manually a raw ip-packet:
+    # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
+    # https://www.binarytides.com/raw-socket-programming-in-python-linux/
+    # more information about raw socket: man 7 socket
+    # some information about sockets: https://realpython.com/python-sockets/
+
+    # create a raw IPv4 socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+    # set the socket option IP_HDRINCL to 1, to tell the kernel that a ip-header is provided
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    # start receiving socket, search for packets coming from the current destination host
+    # the thread is used because the sniffer could start too slow if it would be started after the sending of the packet
+    # the answer from the thread is written to the queue
+    sniffer_thread = threading.Thread(target=receive_data_socket,
+                                      args=(dest_ip, dest_port, src_ip, src_port, current_ack_number + 1))
+    sniffer_thread.start()
+
+    # connect to the remote system
+    print("Trying to send data to " + dest_ip + " on port " + str(dest_port))
+    value = s.sendto(packet, (dest_ip, dest_port))
+    print("Packet sent, " + str(value) + " bytes sent")
+
+    # wait for the answer
+    sniffer_thread.join()
+    print(q.get())
+    s.close()
 
 
-# create a raw IPv4 socket
-s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
-# set the socket option IP_HDRINCL to 1, to tell the kernel that a ip-header is provided
-s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+def craft_packet():
+    # create the ip-header
+    ip_header = '4500 003c'  # Version, IHL, Type of Service | Total Length (inclusive data, in bytes)
+    ip_header += ' abcd 0000'  # Identification | Flags, Fragment Offset
+    ip_header += ' 4006 0000'  # TTL, Protocol | Header Checksum
+    ip_header += ' ' + convert_ip_address(src_ip)  # Source Address
+    ip_header += ' ' + convert_ip_address(dest_ip)  # Destination Address
 
-# create the ip-header
-ip_header = '4500 003c'  # Version, IHL, Type of Service | Total Length (inclusive data, in bytes)
-ip_header += ' abcd 0000'  # Identification | Flags, Fragment Offset
-ip_header += ' 4006 0000'  # TTL, Protocol | Header Checksum
-ip_header += ' ' + convert_ip_address(src_ip)  # Source Address
-ip_header += ' ' + convert_ip_address(dest_ip)  # Destination Address
+    # create the tcp-header
+    tcp_header = convert_port(src_port) + ' ' + convert_port(dest_port)  # Source Port | Destination Port
+    tcp_header += ' 0000 0000'  # Sequence Number
+    tcp_header += ' 0000 0000'  # Acknowledgement Number
+    tcp_header += ' 5002 7110'  # Data Offset, Reserved, Flags | Window Size
+    tcp_header += ' 0000 0000'  # Checksum | Urgent Pointer
 
-# create the tcp-header
-tcp_header = convert_port(src_port) + ' ' + convert_port(dest_port)  # Source Port | Destination Port
-tcp_header += ' 0000 0000'  # Sequence Number
-tcp_header += ' 0000 0000'  # Acknowledgement Number
-tcp_header += ' 5002 7110'  # Data Offset, Reserved, Flags | Window Size
-tcp_header += ' 0000 0000'  # Checksum | Urgent Pointer
+    # create the tcp-payload
+    tcp_payload = 'abcd abcd'
+    tcp_payload += ' abcd abcd'
+    tcp_payload += ' abcd abcd'
+    tcp_payload += ' abcd abcd'
+    tcp_payload += ' abcd abcd'
 
-# create the tcp-payload
-tcp_payload = 'abcd abcd'
-tcp_payload += ' abcd abcd'
-tcp_payload += ' abcd abcd'
-tcp_payload += ' abcd abcd'
-tcp_payload += ' abcd abcd'
+    # calculate the ip-header checksum and the tcp-header checksum
+    ip_checksum = calc_check.ip(ip_header)
+    ip_header = ip_header.split(' ')
+    ip_header[5] = ip_checksum[2:]  # return value of calc_check.ip() is prefixed with '0x'
 
-# calculate the ip-header checksum and the tcp-header checksum
-ip_checksum = calc_check.ip(ip_header)
-ip_header = ip_header.split(' ')
-ip_header[5] = ip_checksum[2:]  # return value of calc_check.ip() is prefixed with '0x'
+    tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header + ' ' + tcp_payload)
+    tcp_header = tcp_header.split(' ')
+    tcp_header[8] = tcp_checksum[2:]  # return value of calc_check.tcp() is prefixed with '0x'
 
-tcp_checksum = calc_check.tcp(' '.join(ip_header) + ' ' + tcp_header + ' ' + tcp_payload)
-tcp_header = tcp_header.split(' ')
-tcp_header[8] = tcp_checksum[2:]  # return value of calc_check.tcp() is prefixed with '0x'
+    current_ack_number = int(''.join(tcp_header[4:6]), 16)
+    ip_header = ' '.join(ip_header)
+    tcp_header = ' '.join(tcp_header)
 
-current_ack_number = int(''.join(tcp_header[4:6]), 16)
-ip_header = ' '.join(ip_header)
-tcp_header = ' '.join(tcp_header)
+    # assemble the packet
+    packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
+    print("Packet to send: " + packet)
+    packet = bytes.fromhex(packet)
+    send_packet(packet, current_ack_number)
 
-# assemble the packet
-packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
-print("Packet to send: " + packet)
-packet = bytes.fromhex(packet)
-
-# start receiving socket, search for packets coming from the current destination host
-# the thread is used because the sniffer could start too slow if it would be started after the sending of the packet
-# the answer from the thread is written to the queue
-q = queue.Queue()
-sniffer_thread = threading.Thread(target=receive_data_socket, args=(dest_ip, dest_port, src_ip, src_port, current_ack_number + 1))
-sniffer_thread.start()
-
-# connect to the remote system
-print("Trying to send data to " + dest_ip + " on port " + str(dest_port))
-value = s.sendto(packet, (dest_ip, dest_port))
-print("Packet sent, " + str(value) + " bytes sent")
-
-# wait for the answer
-sniffer_thread.join()
-print(q.get())
-s.close()
+if __name__ == '__main__':
+    craft_packet()
