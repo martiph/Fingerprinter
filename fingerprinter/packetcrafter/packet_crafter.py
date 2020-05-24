@@ -5,6 +5,13 @@ import queue
 import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
 import fingerprinter.sniffer.sniffer as sniffer
 
+# global variables
+src_ip = '192.168.100.10'
+src_port = 65432
+
+dest_ip = '192.168.100.20'
+dest_port = 80
+
 
 def convert_ip_address(ip_address: str):
     """
@@ -47,14 +54,8 @@ def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
 # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
 # https://www.binarytides.com/raw-socket-programming-in-python-linux/
 # more information about raw socket: man 7 socket
+# some information about sockets: https://realpython.com/python-sockets/
 
-
-# variables
-src_ip = '192.168.100.10'
-src_port = 65432
-
-dest_ip = '192.168.100.20'
-dest_port = 80
 
 # create a raw IPv4 socket
 s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
