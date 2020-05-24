@@ -120,7 +120,10 @@ def craft_packet():
     packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
     print("Packet to send: " + packet)
     packet = bytes.fromhex(packet)
-    send_packet(packet, current_ack_number)
+    return send_packet(packet, current_ack_number)
+
+def fingerprint():
+    craft_packet()
 
 if __name__ == '__main__':
-    craft_packet()
+    fingerprint()
