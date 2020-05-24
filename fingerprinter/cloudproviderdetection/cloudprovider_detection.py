@@ -1,21 +1,22 @@
 import ipaddress
 import json
 import os.path
-import sys
 import urllib.request
 from datetime import date, timedelta
 
 import requests
+import sys
+import platform
 
 ############################################################################################
 # Assign some variables
 ############################################################################################
 script_location = os.path.dirname(os.path.abspath(__file__))
 
-if "\\" in script_location:
+if platform.system() == 'Windows':
     azure_file_path = script_location + "\\azure.json"
     aws_file_path = script_location + "\\aws.json"
-elif "/" in script_location:
+elif platform.system() == 'Linux':
     azure_file_path = script_location + "/azure.json"
     aws_file_path = script_location + "/aws.json"
 else:
@@ -40,9 +41,9 @@ if len(sys.argv) != 2:
     print("-" * 80)
     sys.exit()
 else:
-    remote_ip = sys.argv[1]
+    remote_ip_string = sys.argv[1]
 try:
-    remote_ip = ipaddress.ip_address(remote_ip)
+    remote_ip = ipaddress.ip_address(remote_ip_string)
 except ValueError:
     print("-" * 80)
     print("Please provide the ip address in a proper format.\nAll valid IPv4 and IPv6 addresses are supported.")
@@ -97,12 +98,12 @@ except FileNotFoundError:
 ############################################################################################
 for subnet in azure_ip_subnets:
     if remote_ip in subnet:
-        print("System is hosted on Azure.")
+        print("System with ip address " + remote_ip_string + " is hosted on Azure.")
         sys.exit()
 
 for subnet in aws_ip_subnets:
     if remote_ip in subnet:
-        print("System is hosted on AWS.")
+        print("System with ip address " + remote_ip_string + " is hosted on AWS.")
         sys.exit()
 
 print("System is neither hosted on Azure nor on AWS. It might be hosted on another cloud providers infrastructure or "
