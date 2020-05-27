@@ -6,12 +6,6 @@ import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
 import fingerprinter.sniffer.sniffer as sniffer
 
 # global variables
-src_ip = '192.168.100.10'
-src_port = 65432
-
-dest_ip = '192.168.100.20'
-dest_port = 80
-
 q = queue.Queue()
 
 
@@ -81,7 +75,7 @@ def send_packet(packet: bytes, current_ack_number: int):
     s.close()
 
 
-def craft_packet():
+def craft_packet(src_ip, src_port, dest_ip, dest_port):
     # create the ip-header
     ip_header = '4500 003c'  # Version, IHL, Type of Service | Total Length (inclusive data, in bytes)
     ip_header += ' abcd 0000'  # Identification | Flags, Fragment Offset
@@ -122,8 +116,15 @@ def craft_packet():
     packet = bytes.fromhex(packet)
     return send_packet(packet, current_ack_number)
 
-def fingerprint():
-    craft_packet()
+
+def fingerprint(src_ip, src_port, dest_ip, dest_port):
+
+    craft_packet(src_ip, src_port, dest_ip, dest_port)
+
 
 if __name__ == '__main__':
-    fingerprint()
+    src_ip = '192.168.100.10'
+    src_port = 65432
+    dest_ip = '192.168.100.20'
+    dest_port = 80
+    fingerprint(src_ip, src_port, dest_ip, dest_port)
