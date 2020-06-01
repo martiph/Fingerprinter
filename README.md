@@ -4,7 +4,7 @@ Welcome to the *Fingerprinter* project. The main purpose of this project is to p
   
 ## Installation
 
-First, make sure you have `python-3.8` (including `pip`) locally installed and added to your PATH. Then clone this repository (`git clone https://github.com/martiph/Fingerprinter`) onto your local machine and create a python virtual environment (virtualenv). To install all necessary packages, activate the virtualenv and run `pip install -r /path/to/requirements.txt`. Probably you will need to alter the command slightly. For example if you work on a linux-system, you probably need to use `pip3` instead of `pip`.
+First, make sure you have `python-3.8` (including `pip`) locally installed and added to your PATH. Then clone this repository (`git clone https://github.com/martiph/Fingerprinter.git`) onto your local machine and create a python virtual environment (virtualenv). To install all necessary packages, activate the virtualenv and run `pip install -r /path/to/requirements.txt`. Probably you will need to alter the command slightly. For example if you work on a linux-system, you probably need to use `pip3` instead of `pip`.
 
 `requirements.txt` was generated after development using `pip freeze > requirements.txt`.
 
@@ -15,3 +15,5 @@ TBD
 ## Contribution
 
 You are welcome to open an issue or create a pull request.
+
+Version numbers follow the semantic versioning (https://semver.org/) principle.
