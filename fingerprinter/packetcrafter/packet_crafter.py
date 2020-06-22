@@ -71,8 +71,9 @@ def send_packet(packet: bytes, current_ack_number: int):
 
     # wait for the answer
     sniffer_thread.join()
-    print(q.get())
+    # print(q.get())
     s.close()
+    return True
 
 
 def craft_packet(src_ip, src_port, dest_ip, dest_port):
@@ -114,12 +115,18 @@ def craft_packet(src_ip, src_port, dest_ip, dest_port):
     packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
     print("Packet to send: " + packet)
     packet = bytes.fromhex(packet)
-    return send_packet(packet, current_ack_number)
+    if send_packet(packet, current_ack_number):
+        return q.get()
 
 
 def fingerprint(src_ip, src_port, dest_ip, dest_port):
 
-    craft_packet(src_ip, src_port, dest_ip, dest_port)
+    result = craft_packet(src_ip, src_port, dest_ip, dest_port)
+    # if another matching algorithm would be used, it could be implemented here
+    if 64 < result["ttl"] < 128:
+        print("Windows")
+    elif result["ttl"] < 64:
+        print("Linux")
 
 
 if __name__ == '__main__':
