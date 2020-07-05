@@ -1,14 +1,19 @@
-import socket
-import sys
-import threading
 import queue
+import socket
+import threading
 from datetime import datetime
-from collections import OrderedDict
 
 q = queue.Queue()
 
 
 def scan_port_range(remote_server_ip, start_port, end_port):
+    """
+    scan a port range for open ports
+    :param remote_server_ip: system to scan
+    :param start_port: start of port range (inclusive)
+    :param end_port: end of port range (exclusive)
+    :return: none This function writes the results to a queue.
+    """
     for port in range(start_port, end_port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((remote_server_ip, port))
@@ -21,24 +26,13 @@ def scan_port_range(remote_server_ip, start_port, end_port):
         sock.close()
 
 
-# Some parts of the code were copied from here (25.04.2020):
-# https://www.pythonforbeginners.com/code-snippets-source-code/port-scanner-in-python/
-
-# Display a banner with information about how to use the portscanner, if the user uses the script wrong.
-# if len(sys.argv) != 3:
-#     print("-" * 80)
-#     print("Usage of Fingerprinter.portscanner.py:\npython ./portscanner.py <target-ip-address> <highest_port_in_range>")
-#     print("Example:\n./portscanner.py 127.0.0.1 1000\nThis will scan \'localhost\' in portrange 1 to 1000 (reserved "
-#           "ports).")
-#     print("-" * 80)
-#     sys.exit()
-# else:
-#     remote_server = sys.argv[1]
-#     port_number = sys.argv[2]
-
-
 def scan(remote_server: str, highest_port_number: int):
+    """
 
+    :param remote_server: target system
+    :param highest_port_number: highest port number to scan
+    :return: dictionary with port:status (open|closed)
+    """
     remote_server_ip = socket.gethostbyname(remote_server)
     # Print a banner with information about the host
     print("-" * 80)
