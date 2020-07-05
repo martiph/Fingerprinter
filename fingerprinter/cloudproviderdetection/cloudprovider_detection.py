@@ -32,9 +32,13 @@ aws_ip_subnets = []
 
 
 def download_files():
-    ############################################################################################
+    """
+    Donwloads the files with the ip ranges from Azure or AWS. A list with those addresses is created.
+
+    :return: a list with ip (-ranges) used by Azure or AWS
+    """
+
     # Download Azure IP-Address file. Create a list with subnets-addresses used by Azure.
-    ############################################################################################
     if os.path.exists(azure_file_path):
         os.remove(azure_file_path)
     try:
@@ -59,9 +63,8 @@ def download_files():
     except FileNotFoundError:
         print("Please make sure you have read/write permissions on files in " + script_location)
 
-    ############################################################################################
     # Download AWS IP-Address file. Create a list with subnets-addresses used by AWS.
-    ############################################################################################
+
     if os.path.exists(aws_file_path):
         os.remove(aws_file_path)
     try:
@@ -78,6 +81,11 @@ def download_files():
 
 
 def detect(remote_ip_string):
+    """
+    This function detects whether Azure or AWS is used to host the system.
+    :param remote_ip_string: ip-address to test which cloudprovider is used
+    :return: none Script is terminated after this function.
+    """
     remote_ip = ipaddress.ip_address(remote_ip_string)
     subnets = download_files()
     azure_ip_subnets = subnets[0]
@@ -101,9 +109,7 @@ def detect(remote_ip_string):
 
 
 if __name__ == '__main__':
-    ############################################################################################
     # Check if there is, in addition to the filename, also a commandline parameter
-    ############################################################################################
     if len(sys.argv) != 2:
         print("-" * 80)
         print("Usage of Fingerprinter.cloudprovider_detection.py:\n./cloudprovider_detection.py <target-ip-address>\n")
