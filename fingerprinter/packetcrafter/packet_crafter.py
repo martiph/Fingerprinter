@@ -42,11 +42,27 @@ def convert_port(port: int):
 
 
 def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
+    """
+    receive data on a socket
+    :param src_ip:
+    :param src_port:
+    :param dest_ip:
+    :param dest_port:
+    :param ack_number:
+    :return: none Data was written to a queue
+    """
     recv_data = sniffer.sniff(src_ip, src_port, dest_ip, dest_port, ack_number)
     q.put(recv_data)
 
 
 def send_packet(packet: bytes, current_ack_number: int):
+    """
+    sends a raw packet to a specified system
+    :param packet:
+    :param current_ack_number:
+    :return: True if packet was sent and response received
+    """
+
     # Tutorial on how to craft manually a raw ip-packet:
     # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
     # https://www.binarytides.com/raw-socket-programming-in-python-linux/
@@ -71,12 +87,21 @@ def send_packet(packet: bytes, current_ack_number: int):
 
     # wait for the answer
     sniffer_thread.join()
-    # print(q.get())
+    #(q.get())
     s.close()
     return True
 
 
 def craft_packet(src_ip, src_port, dest_ip, dest_port):
+    """
+    craft a packet with the provided parameters
+    :param src_ip:
+    :param src_port:
+    :param dest_ip:
+    :param dest_port:
+    :return:
+    """
+
     # create the ip-header
     ip_header = '4500 003c'  # Version, IHL, Type of Service | Total Length (inclusive data, in bytes)
     ip_header += ' abcd 0000'  # Identification | Flags, Fragment Offset
@@ -120,7 +145,14 @@ def craft_packet(src_ip, src_port, dest_ip, dest_port):
 
 
 def fingerprint(src_ip, src_port, dest_ip, dest_port):
-
+    """
+    Determine the operating system based on the TTL
+    :param src_ip:
+    :param src_port:
+    :param dest_ip:
+    :param dest_port:
+    :return:
+    """
     result = craft_packet(src_ip, src_port, dest_ip, dest_port)
     # if another matching algorithm would be used, it could be implemented here
     if 64 < result["ttl"] < 128:
