@@ -27,6 +27,7 @@ def print_welcome_banner():
 
     print("\nWelcome to Fingerprinter, a python program by Philip Marti (github.com/martiph).")
     print("You can either detect the cloudprovider of a given system or the operating system of a remote system.")
+    print_help()
 
 
 def print_help():
