@@ -2,8 +2,8 @@ import threading
 import re
 import socket
 import queue
-import fingerprinter.packetcrafter.calculate_header_checksum as calc_check
-import fingerprinter.sniffer.sniffer as sniffer
+import packetcrafter.calculate_header_checksum as calc_check
+import sniffer.sniffer as sniffer
 
 # global variables
 q = queue.Queue()

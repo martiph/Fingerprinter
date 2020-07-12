@@ -1,5 +1,5 @@
-import fingerprinter.packetcrafter.packet_crafter as pc
-import fingerprinter.cloudproviderdetection.cloudprovider_detection as cd
+import packetcrafter.packet_crafter as pc
+import cloudproviderdetection.cloudprovider_detection as cd
 import sys
 
 allowed_commands = ["os-fingerprinting", "cloudprovider-detection"]

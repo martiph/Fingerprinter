@@ -1,2 +1,2 @@
-import fingerprinter.packetcrafter
-import fingerprinter.sniffer
+import packetcrafter
+import sniffer
