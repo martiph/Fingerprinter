@@ -10,7 +10,10 @@ First, make sure you have `python-3.8` (including `pip`) locally installed and a
 
 ## Usage
 
-TBD
+If you want to use the os-fingerprinting function, you need to run the program as root/administrator. Independent on which function you want to use, you need to activate the virtual environment first.
+```bash
+python 
+```
 
 ## Contribution
 
