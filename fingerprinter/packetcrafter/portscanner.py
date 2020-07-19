@@ -28,7 +28,7 @@ def scan_port_range(remote_server_ip, start_port, end_port):
 
 def scan(remote_server: str, highest_port_number: int):
     """
-
+    scan the ports of the specified remote system in range 1 to the highest port number
     :param remote_server: target system
     :param highest_port_number: highest port number to scan
     :return: dictionary with port:status (open|closed)

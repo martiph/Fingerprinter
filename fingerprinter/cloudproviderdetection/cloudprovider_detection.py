@@ -8,9 +8,7 @@ import requests
 import sys
 import platform
 
-############################################################################################
 # Assign some variables
-############################################################################################
 script_location = os.path.dirname(os.path.abspath(__file__))
 
 if platform.system() == 'Windows':
@@ -90,9 +88,8 @@ def detect(remote_ip_string):
     subnets = download_files()
     azure_ip_subnets = subnets[0]
     aws_ip_subnets = subnets[1]
-    ############################################################################################
+
     # Check in which cloud the system is hosted
-    ############################################################################################
     for subnet in azure_ip_subnets:
         if remote_ip in subnet:
             print("System with ip address " + remote_ip_string + " is hosted on Azure.")
@@ -112,10 +109,11 @@ if __name__ == '__main__':
     # Check if there is, in addition to the filename, also a commandline parameter
     if len(sys.argv) != 2:
         print("-" * 80)
-        print("Usage of Fingerprinter.cloudprovider_detection.py:\n./cloudprovider_detection.py <target-ip-address>\n")
+        print("Usage of fingerprinter.cloudprovider_detection.py:\n python ./cloudprovider_detection.py "
+              "<target-ip-address>\n")
         print(
-            "Example:\n./cloudprovider_detection.py 8.8.8.8 \nThis will check if the provided \'ip-address\' is hosted "
-            "on Azure or AWS.")
+            "Example:\npython ./cloudprovider_detection.py 8.8.8.8 \nThis will check if the provided \'ip-address\' "
+            "is hosted on Azure or AWS.")
         print("-" * 80)
         sys.exit()
     else:

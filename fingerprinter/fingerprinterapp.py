@@ -31,6 +31,10 @@ def print_welcome_banner():
 
 
 def print_help():
+    """
+    Prints help on how to use fingerprinterapp
+    :return: output to console
+    """
     print("Please enter one of the following commands:")
     for command in allowed_commands:
         print(command)
@@ -43,6 +47,10 @@ def print_help():
 
 
 def parse_input():
+    """
+    Parse the input and execute the specified command
+    :return: none
+    """
     try:
         text = input(">")
         while text != "exit":

@@ -87,7 +87,6 @@ def send_packet(packet: bytes, current_ack_number: int):
 
     # wait for the answer
     sniffer_thread.join()
-    #(q.get())
     s.close()
     return True
 

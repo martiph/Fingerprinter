@@ -1,6 +1,3 @@
-import sys
-
-
 def ip(packet: str):
     """
     Used to calculate the checksum of an IP-Packet
@@ -162,7 +159,6 @@ def ones_complement_addition(number1, number2):
     :return: One's complement of the two numbers
     """
 
-    # print("calculating the one's complement of " + str(number1) + " + " + str(number2))
     if not (isinstance(number1, int)) and not (isinstance(number2, int)):
         return None
     result = bin(number1 + number2)  # string will begin with '0b', just ignore result[0] and result[1]
@@ -175,11 +171,9 @@ def ones_complement_addition(number1, number2):
 
     if len(result) > 18:
         if len(result) == 19 and result[2] == '1':
-            # print("carry bit needed")
             carry_bit = '1'
             result = list(result)  # convert the string to a list
             result.pop(2)
-            # print(result)
             for i in range(1, 17):
                 if result[-i] == '0' and carry_bit == '1':
                     result[-i] = '1'
@@ -249,10 +243,3 @@ def calc_checksum(packet):
 
 if __name__ == 'main':
     ip("0000 0000 0000 0000 0000 0000 0000 0000 0000 0000")
-    # tcp("c0a8 009e", "c0a8 000c", "06", "060c cc63 5f8d 1e40 6923 1857 5018 faf0 c658 0000 4745 5420 2f64 6d72 2e78 6d6c 2048 5454 502f 312e 310d 0a55 7365 722d 4167 656e 743a 2053 706f 7469 6679 2f31 3133 3030 3036 3538 2057 696e 3332 2f30 2028 5043 2064 6573 6b74 6f70 290d 0a48 6f73 743a 2031 3932 2e31 3638 2e30 2e31 323a 3532 3332 330d 0a4b 6565 702d 416c 6976 653a 2030 0d0a 4163 6365 7074 2d45 6e63 6f64 696e 673a 2067 7a69 700d 0a43 6f6e 6e65 6374 696f 6e3a 206b 6565 702d 616c 6976 650d 0a0d 0a00")
-    # tcp("c0a8 000c", "c0a8 009e", "06", "cc63 060c 6923 365e 5f8d 1ee5 5019 1920 0000 0000 3737 3c2f 6176 3a58 5f52 4449 535f 454e 5452 595f 504f 5254 3e0a 2020 2020 3c2f 6176 3a58 5f52 4449 535f 4465 7669 6365 496e 666f 3e0a 2020 3c2f 6465 7669 6365 3e0a 3c2f 726f 6f74 3e0a")
-    # tcp("c0a8 009e", "c0a8 000c", "06", "060d 0050 025a 1462 6de6 be48 5018 faf0 0000 0000 4745 5420 2f44 4941 4c2f 6170 7073 2f63 6f6d 2e73 706f 7469 6679 2e53 706f 7469 6679 2e54 5676 3220 4854 5450 2f31 2e31 0d0a 5573 6572 2d41 6765 6e74 3a20 5370 6f74 6966 792f 3131 3330 3030 3635 3820 5769 6e33 322f 3020 2850 4320 6465 736b 746f 7029 0d0a 486f 7374 3a20 3139 322e 3136 382e 302e 3132 0d0a 4b65 6570 2d41 6c69 7665 3a20 300d 0a41 6363 6570 742d 456e 636f 6469 6e67 3a20 677a 6970 0d0a 436f 6e6e 6563 7469 6f6e 3a20 6b65 6570 2d61 6c69 7665 0d0a 0d0a")
-
-    # to calculate the checksum for the packet crafter:
-    # print(ip("4500 003c abcd 0000 4006 0000 c0a8 c151 c0a8 c159"))
-    # print(tcp("4500 003c abcd 0000 4006 caf2 c0a8 c151 c0a8 c159 ff98 0050 0000 0000 0000 0000 5002 7110 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000"))
