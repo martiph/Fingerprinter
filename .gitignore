@@ -232,3 +232,5 @@ $RECYCLE.BIN/
 /azure.json
 /aws.json
 /.vscode/
+/fingerprinter/cloudproviderdetection/aws.json
+/fingerprinter/cloudproviderdetection/azure.json
