@@ -70,6 +70,9 @@ def parse_input():
                 cd.detect(target)
     except KeyboardInterrupt:
         sys.exit()
+    except ValueError:
+        print("IP-Addresses need to be in the proper format (as strings) and ports need to be integers.")
+        print_help()
 
 
 def main():
