@@ -34,10 +34,8 @@ def convert_port(port: int):
     :param port: Integer which represents a port
     :return: HEX representation of port number (string), without preceeding '0x'
     """
-    port = hex(port)
-    port = port[2:]
-    while len(port) < 4:
-        port = '0' + port
+    port = hex(int(port))
+    port = port[2:].zfill(4)
     return port
 
 
