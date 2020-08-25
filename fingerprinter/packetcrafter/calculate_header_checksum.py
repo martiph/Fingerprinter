@@ -188,7 +188,6 @@ def ones_complement_addition(number1, number2):
                     carry_bit = '0'
                     raise ValueError
             result = ''.join(result)  # convert the list to a string
-    print("Result of ones complement addition: " + result)
     return int(result, 2)
 
 
@@ -236,7 +235,6 @@ def calc_checksum(packet):
             # this should be an unreachable code section
             print("Checksum is broken. Please contact the developer.")
             raise ValueError("Other value than 0 or 1 in a binary-string.")
-    print("Checksum as list: " + ''.join(checksum))
     checksum = int(''.join(checksum), 2)
     return checksum
 

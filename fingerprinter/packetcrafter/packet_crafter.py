@@ -42,30 +42,28 @@ def convert_port(port: int):
 def receive_data_socket(src_ip, src_port, dest_ip, dest_port, ack_number):
     """
     receive data on a socket
-    :param src_ip:
-    :param src_port:
-    :param dest_ip:
-    :param dest_port:
-    :param ack_number:
-    :return: none Data was written to a queue
+    :param src_ip: Source ip address of the packet to capture
+    :param src_port: Source port of the packet to capture
+    :param dest_ip: Destination ip address of the packet to capture
+    :param dest_port: Destination port of the packet to capture
+    :param ack_number: The acknowledge number of the packet to capture
+    :return: none, Data was written to a queue
     """
     recv_data = sniffer.sniff(src_ip, src_port, dest_ip, dest_port, ack_number)
     q.put(recv_data)
 
 
-def send_packet(packet: bytes, current_ack_number: int):
+def send_packet(src_ip: str, src_port: int, dest_ip: str, dest_port: int, packet: bytes, current_ack_number: int):
     """
     sends a raw packet to a specified system
-    :param packet:
-    :param current_ack_number:
+    :param src_ip: the source address for the packet to send
+    :param src_port: the source port for the packet to send
+    :param dest_ip: the destination address for the packet to send
+    :param dest_port: the destination port for the packet to send
+    :param packet: the whole packet to send in bytes
+    :param current_ack_number: the current acknowledge number of the packet
     :return: True if packet was sent and response received
     """
-
-    # Tutorial on how to craft manually a raw ip-packet:
-    # https://inc0x0.com/tcp-ip-packets-introduction/tcp-ip-packets-3-manually-create-and-send-raw-tcp-ip-packets/
-    # https://www.binarytides.com/raw-socket-programming-in-python-linux/
-    # more information about raw socket: man 7 socket
-    # some information about sockets: https://realpython.com/python-sockets/
 
     # create a raw IPv4 socket
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
@@ -80,7 +78,7 @@ def send_packet(packet: bytes, current_ack_number: int):
 
     # connect to the remote system
     print("Trying to send data to " + dest_ip + " on port " + str(dest_port))
-    value = s.sendto(packet, (dest_ip, dest_port))
+    value = s.sendto(packet, (dest_ip, int(dest_port)))
     print("Packet sent, " + str(value) + " bytes sent")
 
     # wait for the answer
@@ -92,11 +90,11 @@ def send_packet(packet: bytes, current_ack_number: int):
 def craft_packet(src_ip, src_port, dest_ip, dest_port):
     """
     craft a packet with the provided parameters
-    :param src_ip:
-    :param src_port:
-    :param dest_ip:
-    :param dest_port:
-    :return:
+    :param src_ip: the source ip address in IPv4 format
+    :param src_port: the source port
+    :param dest_ip: the destination ip address in IPv4 format
+    :param dest_port: the destination port
+    :return: the responding packet as a map
     """
 
     # create the ip-header
@@ -137,24 +135,24 @@ def craft_packet(src_ip, src_port, dest_ip, dest_port):
     packet = ip_header + ' ' + tcp_header + ' ' + tcp_payload
     print("Packet to send: " + packet)
     packet = bytes.fromhex(packet)
-    if send_packet(packet, current_ack_number):
+    if send_packet(src_ip, src_port, dest_ip, dest_port, packet, current_ack_number):
         return q.get()
 
 
 def fingerprint(src_ip, src_port, dest_ip, dest_port):
     """
     Determine the operating system based on the TTL
-    :param src_ip:
-    :param src_port:
-    :param dest_ip:
-    :param dest_port:
-    :return:
+    :param src_ip: Source IPv4 address for the packet
+    :param src_port: Source port for the packet
+    :param dest_ip: IPv4 address of the target
+    :param dest_port: Open port of the target
+    :return: Prints either 'Windows' or 'Linux'
     """
     result = craft_packet(src_ip, src_port, dest_ip, dest_port)
     # if another matching algorithm would be used, it could be implemented here
-    if 64 < result["ttl"] < 128:
+    if 64 < int(result["ttl"]) <= 128:
         print("Windows")
-    elif result["ttl"] < 64:
+    elif int(result["ttl"]) <= 64:
         print("Linux")
 
 

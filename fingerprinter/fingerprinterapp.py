@@ -64,10 +64,12 @@ def parse_input():
                 dest_ip = input("Destination IP-Address (Address of target):")
                 dest_port = input("Destination Port: ")
                 pc.fingerprint(src_ip, src_port, dest_ip, dest_port)
+                text = input(">")
             elif text == "cloudprovider-detection":
                 print("Please provide the IP-Address of your target")
                 target = input(">")
                 cd.detect(target)
+                text = input(">")
     except KeyboardInterrupt:
         sys.exit()
     except ValueError:
