@@ -22,7 +22,7 @@ def print_welcome_banner():
           @########        #######by#######@\n\
           @########        #####Philip#####@\n\
           @########        #####Marti######@\n\
-          @######################v1.0######@\n\
+          @######################v1.1######@\n\
           @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     print("\nWelcome to Fingerprinter, a python program by Philip Marti (github.com/martiph).")
