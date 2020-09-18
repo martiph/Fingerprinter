@@ -219,22 +219,13 @@ def calc_checksum(packet):
         checksum = ones_complement_addition(checksum, packet[i])
     checksum = bin(checksum)
 
-    if len(checksum) < 18:  # add leading zeros
-        partial_checksum = checksum[2:]
-        while len(partial_checksum) < 16:
-            partial_checksum = '0' + partial_checksum
-        checksum = '0b' + partial_checksum
-    checksum = list(checksum)
+    partial_checksum = checksum[2:]
+    partial_checksum.zfill(16)
+    for i in range(len(partial_checksum)):
+        partial_checksum[i] = ~int(partial_checksum[i])
+    checksum = list('0b' + partial_checksum)
 
-    for i in range(2, len(checksum)):  # flip the bits
-        if checksum[i] == '0':
-            checksum[i] = '1'
-        elif checksum[i] == '1':
-            checksum[i] = '0'
-        else:
-            # this should be an unreachable code section
-            print("Checksum is broken. Please contact the developer.")
-            raise ValueError("Other value than 0 or 1 in a binary-string.")
+    print("Checksum as list: " + ''.join(checksum))
     checksum = int(''.join(checksum), 2)
     return checksum
 
