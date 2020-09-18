@@ -120,10 +120,10 @@ def sniff(src_ip, src_port, dest_ip, dest_port, ack_number):
     listening for any traffic. All sniffed traffic is printed to STDOUT. The function returns the packet which
     matches the parameters.
 
-    :param src_ip: The source IPv4 address
-    :param src_port: The source port
-    :param dest_ip: The destination IPv4 address
-    :param dest_port: The destination port
+    :param src_ip: The source IPv4 address of the packet
+    :param src_port: The source port of the packet
+    :param dest_ip: The destination IPv4 address of the packet
+    :param dest_port: The destination port of the packet
     :param ack_number: The acknowledge number
     :return: the packet matching the parameters as a dictionary
     """
@@ -149,8 +149,8 @@ def sniff(src_ip, src_port, dest_ip, dest_port, ack_number):
             data = s.recvfrom(65565)
             data = parse(data[0].hex())
             print(data.items())
-            if (data["src_ip"] == src_ip) and (data["src_port"] == src_port) and (data["dest_ip"] == dest_ip) and (
-                    data["dest_port"] == dest_port) and (data["ack_number"] == ack_number):
+            if (data["src_ip"] == src_ip) and (data["src_port"] == int(src_port)) and (data["dest_ip"] == dest_ip) and (
+                    data["dest_port"] == int(dest_port)) and (data["ack_number"] == int(ack_number)):
                 return data
     except KeyboardInterrupt:
         print("You pressed Ctrl+C\nStop sniffing...")

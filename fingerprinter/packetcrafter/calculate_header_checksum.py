@@ -188,7 +188,6 @@ def ones_complement_addition(number1, number2):
                     carry_bit = '0'
                     raise ValueError
             result = ''.join(result)  # convert the list to a string
-    print("Result of ones complement addition: " + result)
     return int(result, 2)
 
 
